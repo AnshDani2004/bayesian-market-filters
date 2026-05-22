@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import pytest
 import numpy as np
-from particle import StochasticVolParticleFilter
+from src.filters.particle import StochasticVolParticleFilter
 
 def test_ess_bounds():
     """

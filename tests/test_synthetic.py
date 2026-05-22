@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import pytest
 import numpy as np
-from synthetic import MarketSimulator
+from src.data.synthetic import MarketSimulator
 
 def test_ou_convergence():
     """

@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from synthetic import MarketSimulator
-from kalman import AdaptiveKalmanFilter
+from src.data.synthetic import MarketSimulator
+from src.filters.kalman import AdaptiveKalmanFilter
 
 def calculate_rmse(predictions, targets):
     """Calculates Root Mean Squared Error."""

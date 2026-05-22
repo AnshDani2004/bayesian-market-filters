@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import pytest
 import pandas as pd
 import numpy as np
-from market import Backtester
+from src.data.market import Backtester
 
 def test_fee_deduction():
     """

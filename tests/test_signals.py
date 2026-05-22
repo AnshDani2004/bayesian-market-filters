@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import pytest
 import numpy as np
-from signals.generator import SignalGenerator
+from src.signals.generator import SignalGenerator
 
 def test_regime_sizing():
     """Test that position size is halved during volatile regimes."""

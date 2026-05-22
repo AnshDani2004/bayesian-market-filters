@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm, skew
-from kalman import AdaptiveKalmanFilter
-from particle import StochasticVolParticleFilter
+from src.filters.kalman import AdaptiveKalmanFilter
+from src.filters.particle import StochasticVolParticleFilter
 
 def run_benchmark():
     # 1. Simulate Fat-Tail Event
@@ -26,7 +26,7 @@ def run_benchmark():
     
     # Higher R prevents all weights going to exactly 0 during a massive shock
     # Higher Q_h allows log-volatility to spike quickly
-    pf = StochasticVolParticleFilter(n_particles=10000, initial_price=100.0, Q_h=1.0, R=10.0, random_seed=42)
+    pf = StochasticVolParticleFilter(n_particles=10000, initial_price=100.0, Q_h=1.0, random_seed=42)
     
     # We want to capture the posterior EXACTLY at t=50 (the shock)
     shock_idx = 50

@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from synthetic import MarketSimulator
-from hmm import RegimeHMM
+from src.data.synthetic import MarketSimulator
+from src.filters.hmm import RegimeHMM
 
 def run_benchmark():
     # 1. Generate Ground Truth Data
