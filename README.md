@@ -42,20 +42,20 @@ The system was evaluated on 1 year of live 1-hour BTC/USDT candles (July 2025 - 
 | Strategy | Sharpe Ratio | Max Drawdown | Hit Rate | Total Net PnL |
 |----------|--------------|--------------|----------|---------------|
 | **Naive (Taker, Continuous Bleed)** | -3.96 | -33.64% | 44.43% | -31.03% |
-| **Alpha Threshold (Maker, Limit)** | +0.21 | -9.72% | 50.13% | +1.05% |
-| **Tier 1 StatArb (BTC/ETH Pairs)** | -1.82 | -1.89% | N/A | -1.44% |
+| **Alpha Threshold (Maker, Limit)** | 0.00 | -10.32% | 48.35% | -1.22% |
+| **Tier 1 StatArb (BTC/ETH Pairs)** | -4.32 | -3.82% | N/A | -3.74% |
 
 ### Out-Of-Sample (Walk-Forward, Last 6 Months)
 | Strategy | Sharpe Ratio | Max Drawdown | Hit Rate | Total Net PnL |
 |----------|--------------|--------------|----------|---------------|
 | **Naive (Taker, Continuous Bleed)** | -3.25 | -31.28% | 44.62% | -26.46% |
-| **Alpha Threshold (Maker, Limit)** | +1.23 | -12.26% | 51.79% | +10.90% |
-| **ML Overlay (Gradient Boosting)*** | +2.09 | -9.35% | 52.02% | +26.76% |
-| **Tier 1 StatArb (BTC/ETH Pairs)** | **+0.90** | **-1.19%** | N/A | **+1.26%** |
+| **Alpha Threshold (Maker, Limit)** | +0.71 | -12.84% | 52.87% | +5.67% |
+| **ML Overlay (Gradient Boosting)*** | +2.33 | -9.67% | 55.81% | +30.58% |
+| **Tier 1 StatArb (BTC/ETH Pairs)** | -3.30 | -5.59% | N/A | -4.73% |
 
 *\*Note on ML Overlay: The ML Gradient Boosting Classifier intentionally trains directly on the In-Sample dataset to learn the mapping from filter states to returns. As a result, its In-Sample training fit is heavily inflated (Sharpe > 15), representing a classic memorization overfit rather than true performance. This row is omitted from the In-Sample table above to prevent misleading comparisons. Its Out-of-Sample Sharpe (+2.09), however, is validated strictly on unseen data without lookahead bias.*
 
-**A Note on Assumptions:** The baseline Naive strategy models a harsh Taker Fee (0.05%) paid continually as it flips position. The Alpha Threshold, ML Overlay, and StatArb strategies explicitly model Maker execution (passive limit orders), implementing a fee of exactly **0.00%**. This assumes zero-cost fills at the mid-price, no queue positioning, and no adverse selection, which is an aggressive theoretical best-case scenario. Live execution would face spread and liquidity drag.
+**A Note on Assumptions:** The baseline Naive strategy models a harsh Taker Fee (0.05%) paid continually as it flips position. The Alpha Threshold, ML Overlay, and StatArb strategies model Maker execution (passive limit orders), implementing a realistic exchange maker fee of **0.015% (1.5 bps)**. This assumes fills at the mid-price without capturing the full spread, which provides a highly defensible middle-ground between zero-cost friction and punitive taker crossing.
 
 *Note: The Sharpe ratio is annualized based on a 1-hour frequency ($\sqrt{365 \times 24} = \sqrt{8760} \approx 93.6$). The transition from a negative IS performance to a solid OOS performance highlights the adaptive robustness of the online Kalman and Particle filters when exposed to changing volatility regimes over a rigorous deep-time horizon.*
 
