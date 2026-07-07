@@ -1,6 +1,6 @@
-# Algorithmic Trading Filters
+# Bayesian Market Filters
 
-A collection of sophisticated algorithmic trading filters and regime-detection models, benchmarked against naive moving averages on synthetic market data, and backtested on live Binance 1-hour crypto data.
+A collection of sophisticated algorithmic trading filters and regime-detection models, benchmarked against naive moving averages on synthetic market data, and backtested on historical Binance hourly crypto data, frozen for reproducibility.
 
 ## Final System Architecture
 
@@ -61,7 +61,7 @@ The system was evaluated on 1 year of live 1-hour BTC/USDT candles (July 2025 - 
 
 *Note: The Sharpe ratio is annualized based on a 1-hour frequency ($\sqrt{365 \times 24} = \sqrt{8760} \approx 93.6$). The transition from a negative IS performance to a solid OOS performance highlights the adaptive robustness of the online Kalman and Particle filters when exposed to changing volatility regimes over a rigorous deep-time horizon.*
 
-**A Note on Limitations**: While the mathematical integrity of the execution layer holds firm, the quoted results do not explicitly model complex multi-level orderbook slippage beyond the base taker fee, or adversarial market impact. In a live environment, net PnL will scale with available liquidity.
+**A Note on Limitations**: While the mathematical integrity of the execution layer holds firm, the quoted results do not explicitly model complex multi-level orderbook slippage beyond the base taker fee, or adversarial market impact. In a live environment, net PnL will scale with available liquidity. Furthermore, all backtest results are pinned to the specific dataset snapshot committed in the `data/` directory; anyone rerunning the notebooks against fresh live data should expect different numbers rather than assuming these figures reproduce indefinitely.
 
 ## Notebooks & Mathematical Derivations
 Please review the Jupyter Notebooks for step-by-step mathematical derivations of the state-space models, E-M update loops, and execution rules:
