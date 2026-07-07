@@ -1,23 +1,25 @@
 # Algorithmic Trading Filters
 
-A collection of sophisticated algorithmic trading filters and regime-detection models, benchmarked against naive moving averages on synthetic market data, and backtested on live Binance 1-minute crypto data.
+A collection of sophisticated algorithmic trading filters and regime-detection models, benchmarked against naive moving averages on synthetic market data, and backtested on live Binance 1-hour crypto data.
 
 ## Final System Architecture
 
 ```mermaid
 graph TD
-    A[Binance REST API / Live Data] -->|1m OHLCV| B{Filter Stack}
+    A[Binance REST API / Live Data] -->|1h OHLCV| B{Filter Stack}
     
     B --> C[Adaptive Kalman Filter]
     B --> D[HMM Regime Detector]
-    B --> E[Stochastic Vol Particle Filter]
+    B --> E[Pairs Kalman Filter]
     
     C -->|Latent Fair Value| F(Signal Generator)
     D -->|P_quiet| F
-    E -->|Skewness / Var| F
     
     F -->|Raw Direction & Size| G[Execution Engine]
     G -->|Alpha Threshold| H[Portfolio Tracker]
+    
+    E -->|Cointegration Spread| I(StatArb Execution)
+    I -->|Dynamic Kelly Sizing| H
     
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style H fill:#bbf,stroke:#333,stroke-width:2px
@@ -27,7 +29,7 @@ graph TD
 - **Ground-Truth Data Generator (`synthetic.py`)**: Simulates a hidden Ornstein-Uhlenbeck (OU) fair value process with Markov Chain regime switching and fat-tailed noise.
 - **Adaptive Kalman Filter**: Tracks latent fair value and drift with dynamic online noise estimation (Robbins-Monro).
 - **Cointegration Kalman Filter**: Tracks the dynamic hedge ratio ($\beta$) for Multi-Asset Statistical Arbitrage (Pairs Trading).
-- **Stochastic Volatility Particle Filter**: Models non-Gaussian fat-tailed regime volatility using Sequential Importance Resampling (SIR) with 10,000 particles.
+- **Stochastic Volatility Particle Filter**: Models non-Gaussian fat-tailed regime volatility using Sequential Importance Resampling (SIR) with 1,000 particles.
 - **Hidden Markov Model (HMM)**: Unsupervised 2-state regime detection calibrated offline via Baum-Welch EM.
 - **Machine Learning Overlay**: Gradient Boosting Decision Trees (`scikit-learn`) synthesizing mathematical filter states to dynamically generate execution probabilities.
 - **Dynamic Kelly Sizing**: Continuous capital allocation sized proportionally to edge and inversely to volatility.
@@ -41,7 +43,6 @@ The system was evaluated on 1 year of live 1-hour BTC/USDT candles (July 2025 - 
 |----------|--------------|--------------|----------|---------------|
 | **Naive (Taker, Continuous Bleed)** | -3.96 | -33.64% | 44.43% | -31.03% |
 | **Alpha Threshold (Maker, Limit)** | +0.21 | -9.72% | 50.13% | +1.05% |
-| **ML Overlay (Gradient Boosting)** | **+16.37** | **-2.59%** | **78.92%** | **+247.16%** |
 | **Tier 1 StatArb (BTC/ETH Pairs)** | -1.82 | -1.89% | N/A | -1.44% |
 
 ### Out-Of-Sample (Walk-Forward, Last 6 Months)
@@ -49,10 +50,12 @@ The system was evaluated on 1 year of live 1-hour BTC/USDT candles (July 2025 - 
 |----------|--------------|--------------|----------|---------------|
 | **Naive (Taker, Continuous Bleed)** | -3.25 | -31.28% | 44.62% | -26.46% |
 | **Alpha Threshold (Maker, Limit)** | +1.23 | -12.26% | 51.79% | +10.90% |
-| **ML Overlay (Gradient Boosting)** | **+2.09** | **-9.35%** | **52.02%** | **+26.76%** |
+| **ML Overlay (Gradient Boosting)*** | +2.09 | -9.35% | 52.02% | +26.76% |
 | **Tier 1 StatArb (BTC/ETH Pairs)** | **+0.90** | **-1.19%** | N/A | **+1.26%** |
 
-*Note: The ML Overlay explicitly trains on the IS period to synthesize the filter states, resulting in a naturally high IS performance. The true test of robustness is its stellar +2.09 Sharpe OOS validation, proving its ability to generalize without curve-fitting.*
+*\*Note on ML Overlay: The ML Gradient Boosting Classifier intentionally trains directly on the In-Sample dataset to learn the mapping from filter states to returns. As a result, its In-Sample training fit is heavily inflated (Sharpe > 15), representing a classic memorization overfit rather than true performance. This row is omitted from the In-Sample table above to prevent misleading comparisons. Its Out-of-Sample Sharpe (+2.09), however, is validated strictly on unseen data without lookahead bias.*
+
+**A Note on Assumptions:** The baseline Naive strategy models a harsh Taker Fee (0.05%) paid continually as it flips position. The Alpha Threshold, ML Overlay, and StatArb strategies explicitly model Maker execution (passive limit orders), implementing a fee of exactly **0.00%**. This assumes zero-cost fills at the mid-price, no queue positioning, and no adverse selection, which is an aggressive theoretical best-case scenario. Live execution would face spread and liquidity drag.
 
 *Note: The Sharpe ratio is annualized based on a 1-hour frequency ($\sqrt{365 \times 24} = \sqrt{8760} \approx 93.6$). The transition from a negative IS performance to a solid OOS performance highlights the adaptive robustness of the online Kalman and Particle filters when exposed to changing volatility regimes over a rigorous deep-time horizon.*
 
