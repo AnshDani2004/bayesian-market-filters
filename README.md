@@ -25,9 +25,12 @@ graph TD
 
 ## Tier 1 Features
 - **Ground-Truth Data Generator (`synthetic.py`)**: Simulates a hidden Ornstein-Uhlenbeck (OU) fair value process with Markov Chain regime switching and fat-tailed noise.
-- **Adaptive Kalman Filter (`kalman.py`)**: Estimates latent fair value from noisy price observations. Automatically tunes its $Q$ and $R$ noise matrices online using a recursive EM update (Robbins-Monro stochastic approximation) to adapt to sudden volatility shocks.
-- **Hidden Markov Model (`hmm.py`)**: A 2-state unsupervised regime detector. Includes a Baum-Welch EM algorithm for offline parameter calibration and a Forward filter for real-time posterior probability estimation ($P(\text{regime} \mid \text{data})$).
-- **Particle Filter (`particle.py`)**: Uses Sequential Importance Resampling (SIR) to maintain 10,000 particles tracking unobservable stochastic log-volatility. Unlike Kalman, this properly isolates skewed, fat-tailed downside risk.
+- **Adaptive Kalman Filter**: Tracks latent fair value and drift with dynamic online noise estimation (Robbins-Monro).
+- **Cointegration Kalman Filter**: Tracks the dynamic hedge ratio ($\beta$) for Multi-Asset Statistical Arbitrage (Pairs Trading).
+- **Stochastic Volatility Particle Filter**: Models non-Gaussian fat-tailed regime volatility using Sequential Importance Resampling (SIR) with 10,000 particles.
+- **Hidden Markov Model (HMM)**: Unsupervised 2-state regime detection calibrated offline via Baum-Welch EM.
+- **Machine Learning Overlay**: Gradient Boosting Decision Trees (`scikit-learn`) synthesizing mathematical filter states to dynamically generate execution probabilities.
+- **Dynamic Kelly Sizing**: Continuous capital allocation sized proportionally to edge and inversely to volatility.
 
 ## Capstone Backtest Results (Live BTC Data, Walk-Forward Validation)
 

@@ -103,3 +103,8 @@ class StochasticVolParticleFilter:
         mean_mu = np.average(self.mu, weights=self.weights)
         mean_h = np.average(self.h, weights=self.weights)
         return mean_mu, mean_h
+        
+    def get_variance(self) -> float:
+        """Returns the estimated variance of the latent price."""
+        _, mean_h = self.estimate()
+        return np.exp(mean_h)

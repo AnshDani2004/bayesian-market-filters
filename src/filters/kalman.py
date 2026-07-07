@@ -121,3 +121,64 @@ class AdaptiveKalmanFilter:
         self.predict()
         self.update(y)
         return self.x[0]
+
+
+class PairsKalmanFilter:
+    """
+    A Kalman Filter for Cointegration / Statistical Arbitrage.
+    Tracks the dynamic hedge ratio (beta) and intercept (alpha) between two assets.
+    Observation: y_t = alpha_t + beta_t * x_t + v_t
+    State: s_t = [alpha_t, beta_t]^T
+    """
+    def __init__(self, delta: float = 1e-4, R: float = 1e-3):
+        """
+        Args:
+            delta: Process noise variance (controls how fast beta/alpha adapt).
+            R: Observation noise variance (controls how much we trust the spread).
+        """
+        self.x = np.array([0.0, 1.0])  # Initialize [alpha, beta]
+        self.P = np.eye(2)             # State covariance
+        
+        self.Vw = delta / (1 - delta) * np.eye(2) # Process noise (Q)
+        self.Ve = R                               # Observation noise (R)
+        self.I = np.eye(2)
+        
+    def step(self, x_price: float, y_price: float) -> float:
+        """
+        Predicts and updates the filter based on the new prices.
+        
+        Args:
+            x_price: Price of independent asset (e.g. ETH)
+            y_price: Price of dependent asset (e.g. BTC)
+            
+        Returns:
+            The fair value of y_price based on the cointegration.
+        """
+        # Predict step
+        # State transition is Identity (F = I). Random walk for alpha and beta.
+        # x_{t|t-1} = x_{t-1|t-1}
+        self.P = self.P + self.Vw
+        
+        # Observation matrix H = [1, x_price]
+        H = np.array([[1.0, x_price]])
+        
+        # Innovation (residual spread)
+        y_pred = (H @ self.x)[0]
+        e = y_price - y_pred
+        
+        # Innovation covariance S
+        S = H @ self.P @ H.T + self.Ve
+        
+        # Kalman Gain K
+        K = self.P @ H.T @ np.linalg.inv(S)
+        
+        # Update step
+        self.x = self.x + (K * e).flatten()
+        
+        # Covariance update (Joseph form)
+        IKH = self.I - K @ H
+        self.P = IKH @ self.P @ IKH.T + K * self.Ve @ K.T
+        
+        # Return updated fair value (using updated state)
+        return (H @ self.x)[0]
+
