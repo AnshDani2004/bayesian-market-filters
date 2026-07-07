@@ -36,14 +36,14 @@ The system was evaluated on 1 year of live 1-hour BTC/USDT candles (July 2025 - 
 ### In-Sample (First 6 Months)
 | Strategy | Sharpe Ratio | Max Drawdown | Hit Rate | Total Net PnL |
 |----------|--------------|--------------|----------|---------------|
-| **Naive (Taker, Continuous Bleed)** | -5.41 | -46.57% | 43.76% | -44.47% |
-| **Alpha Threshold (Maker, Limit)** | -1.20 | -20.27% | 49.60% | -12.65% |
+| **Naive (Taker, Continuous Bleed)** | -3.96 | -33.64% | 44.43% | -31.03% |
+| **Alpha Threshold (Maker, Limit)** | **+0.21** | **-9.72%** | **50.13%** | **+1.05%** |
 
 ### Out-Of-Sample (Walk-Forward, Last 6 Months)
 | Strategy | Sharpe Ratio | Max Drawdown | Hit Rate | Total Net PnL |
 |----------|--------------|--------------|----------|---------------|
-| **Naive (Taker, Continuous Bleed)** | -3.83 | -34.39% | 44.79% | -33.93% |
-| **Alpha Threshold (Maker, Limit)** | **+0.99** | **-15.62%** | **52.21%** | **+9.66%** |
+| **Naive (Taker, Continuous Bleed)** | -3.25 | -31.28% | 44.62% | -26.46% |
+| **Alpha Threshold (Maker, Limit)** | **+1.23** | **-12.26%** | **51.79%** | **+10.90%** |
 
 *Note: The Sharpe ratio is annualized based on a 1-hour frequency ($\sqrt{365 \times 24} = \sqrt{8760} \approx 93.6$). The transition from a negative IS performance to a solid OOS performance highlights the adaptive robustness of the online Kalman and Particle filters when exposed to changing volatility regimes over a rigorous deep-time horizon.*
 

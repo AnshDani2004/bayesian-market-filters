@@ -1,13 +1,4 @@
-import nbformat as nbf
-
-nb = nbf.v4.new_notebook()
-
-md_intro = """# Full-Stack Backtest on Binance BTC/USDT 
-
-This notebook represents the capstone of Tier 2. We will pull live, real-world BTC/USDT 1-minute candlestick data from the Binance REST API, run our entire algorithmic filter stack (Kalman + HMM + Particle), generate sizing and directional signals, and backtest the results with a realistic 0.05% taker fee.
-"""
-
-code_imports = """import sys
+import sys
 import os
 import numpy as np
 import pandas as pd
@@ -21,9 +12,9 @@ from src.filters.hmm import RegimeHMM
 from src.filters.particle import StochasticVolParticleFilter
 from src.signals.generator import SignalGenerator
 from src.execution.engine import ExecutionEngine
-"""
 
-code_fetch = """# 1. Fetch Data
+
+# 1. Fetch Data
 print("Fetching 1 year of 1-hour BTC/USDT data from Binance...")
 df = BinanceDataClient.fetch_data(symbol="BTCUSDT", interval="1h", max_points=10000)
 # Slice to exactly 1 year of hours (8760) if we have more
@@ -34,9 +25,9 @@ prices = df['close'].values
 returns = df['close'].pct_change().fillna(0).values
 
 print(f"Fetched {len(df)} candles. Date range: {df['timestamp'].min()} to {df['timestamp'].max()}")
-"""
 
-code_run_filters = """# 2. Walk-Forward Validation & Signal Generation
+
+# 2. Walk-Forward Validation & Signal Generation
 print("Initializing Filters...")
 
 # Calculate train/test split index (50%)
@@ -106,9 +97,9 @@ for t in range(len(prices)):
     spreads[t] = sig_dict['spread_signal']
 
 print("Filtering complete.")
-"""
 
-code_backtest = """# 3. Backtest IS vs OOS
+
+# 3. Backtest IS vs OOS
 print("Running Backtest Engine...")
 
 # Run Naive (Taker)
@@ -125,7 +116,7 @@ def print_metrics(res_df, period, title):
     sub_df = res_df[res_df['period'] == period].copy()
     if len(sub_df) == 0: return
     metrics = Backtester.calculate_metrics(sub_df, periods_per_year=8760)
-    print(f"\\n=== Backtest Results: {title} ({period}) [N={len(sub_df)}] ===")
+    print(f"\n=== Backtest Results: {title} ({period}) [N={len(sub_df)}] ===")
     print(f"Sharpe Ratio:  {metrics['sharpe_ratio']:.2f}")
     if 'max_drawdown' in metrics:
         print(f"Max Drawdown:  {metrics['max_drawdown']*100:.2f}%")
@@ -136,9 +127,9 @@ print_metrics(results_naive, 'IS', 'Naive Continuous Bleed')
 print_metrics(results_naive, 'OOS', 'Naive Continuous Bleed')
 print_metrics(results_thresh, 'IS', 'Alpha Threshold (Maker)')
 print_metrics(results_thresh, 'OOS', 'Alpha Threshold (Maker)')
-"""
 
-code_plot = """# 4. Plot Cumulative PnL with IS/OOS split
+
+# 4. Plot Cumulative PnL with IS/OOS split
 plt.figure(figsize=(14, 7))
 
 # Plot IS/OOS shading
@@ -165,18 +156,4 @@ plt.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.savefig('backtest_results.png')
 # plt.show()
-"""
 
-nb['cells'] = [
-    nbf.v4.new_markdown_cell(md_intro),
-    nbf.v4.new_code_cell(code_imports),
-    nbf.v4.new_code_cell(code_fetch),
-    nbf.v4.new_code_cell(code_run_filters),
-    nbf.v4.new_code_cell(code_backtest),
-    nbf.v4.new_code_cell(code_plot)
-]
-
-with open('/Users/ansh/Proj_Res_3/notebook_03_backtest.ipynb', 'w') as f:
-    nbf.write(nb, f)
-
-print("Notebook 03 created.")

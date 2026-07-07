@@ -19,7 +19,8 @@ class SignalGenerator:
                          kf_mean: float, 
                          kf_std: float, 
                          kf_drift: float, 
-                         prob_quiet: float) -> dict:
+                         prob_quiet: float,
+                         macro_trend: int = 0) -> dict:
         """
         Generates trading signals for the current timestep.
         
@@ -39,6 +40,10 @@ class SignalGenerator:
         std_safe = max(kf_std, 1e-6)
         raw_fv_signal = (kf_mean - mid_price) / std_safe
         fair_value_signal = np.clip(raw_fv_signal, -5.0, 5.0)
+        
+        # Macro Trend Filter: Block mean-reversion trades that fight the macro trend
+        if macro_trend != 0 and np.sign(fair_value_signal) != np.sign(macro_trend):
+            fair_value_signal = 0.0
         
         # 2. Momentum Signal
         # Simple sign of the drift to act as a trend-following overlay
