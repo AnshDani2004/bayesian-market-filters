@@ -36,7 +36,15 @@ class BinanceDataClient:
                     print("Binance API blocked (451 Unavailable For Legal Reasons). Falling back to yfinance.")
                     import yfinance as yf
                     yf_symbol = symbol.replace("USDT", "-USD")
-                    df = yf.download(yf_symbol, interval="1m", period="7d", progress=False)
+                    
+                    if interval == "1h":
+                        period = "730d"
+                    elif interval == "1m":
+                        period = "7d"
+                    else:
+                        period = "max"
+                        
+                    df = yf.download(yf_symbol, interval=interval, period=period, progress=False)
                     df.reset_index(inplace=True)
                     df.rename(columns={'Datetime': 'timestamp', 'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}, inplace=True)
                     # For yfinance multi-index columns, sometimes it returns tuples
