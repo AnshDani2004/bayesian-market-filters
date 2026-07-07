@@ -167,10 +167,10 @@ class PairsKalmanFilter:
         e = y_price - y_pred
         
         # Innovation covariance S
-        S = H @ self.P @ H.T + self.Ve
+        self.S = H @ self.P @ H.T + self.Ve
         
         # Kalman Gain K
-        K = self.P @ H.T @ np.linalg.inv(S)
+        K = self.P @ H.T @ np.linalg.inv(self.S)
         
         # Update step
         self.x = self.x + (K * e).flatten()

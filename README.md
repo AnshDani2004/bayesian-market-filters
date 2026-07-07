@@ -43,7 +43,7 @@ The system was evaluated on 1 year of live 1-hour BTC/USDT candles (July 2025 - 
 |----------|--------------|--------------|----------|---------------|
 | **Naive (Taker, Continuous Bleed)** | -3.96 | -33.64% | 44.43% | -31.03% |
 | **Alpha Threshold (Maker, Limit)** | 0.00 | -10.32% | 48.35% | -1.22% |
-| **Tier 1 StatArb (BTC/ETH Pairs)** | -4.32 | -3.82% | N/A | -3.74% |
+| **Tier 1 StatArb (BTC/ETH Pairs)** | -4.47 | -0.39% | N/A | -0.37% |
 
 ### Out-Of-Sample (Walk-Forward, Last 6 Months)
 | Strategy | Sharpe Ratio | Max Drawdown | Hit Rate | Total Net PnL |
@@ -51,7 +51,7 @@ The system was evaluated on 1 year of live 1-hour BTC/USDT candles (July 2025 - 
 | **Naive (Taker, Continuous Bleed)** | -3.25 | -31.28% | 44.62% | -26.46% |
 | **Alpha Threshold (Maker, Limit)** | +0.71 | -12.84% | 52.87% | +5.67% |
 | **ML Overlay (Gradient Boosting)*** | +2.33 | -9.67% | 55.81% | +30.58% |
-| **Tier 1 StatArb (BTC/ETH Pairs)** | -3.30 | -5.59% | N/A | -4.73% |
+| **Tier 1 StatArb (BTC/ETH Pairs)** | -3.73 | -0.18% | N/A | -0.15% |
 
 *\*Note on ML Overlay: The ML Gradient Boosting Classifier intentionally trains directly on the In-Sample dataset to learn the mapping from filter states to returns. As a result, its In-Sample training fit is heavily inflated (Sharpe > 15), representing a classic memorization overfit rather than true performance. This row is omitted from the In-Sample table above to prevent misleading comparisons. Its Out-of-Sample Sharpe (+2.09), however, is validated strictly on unseen data without lookahead bias.*
 

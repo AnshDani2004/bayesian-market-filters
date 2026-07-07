@@ -26,15 +26,25 @@ from src.execution.engine import ExecutionEngine
 """
 
 code_fetch = """# 1. Fetch Data
-print("Fetching 1 year of 1-hour BTC/USDT data from Binance...")
-df = BinanceDataClient.fetch_data(symbol="BTCUSDT", interval="1h", max_points=10000)
-if len(df) > 8760:
-    df = df.iloc[-8760:].copy()
-    df.reset_index(drop=True, inplace=True)
+import os
+data_file = 'data/btc_1h_2025_2026.csv'
+if os.path.exists(data_file):
+    print("Loading data from frozen CSV...")
+    df = pd.read_csv(data_file, parse_dates=['timestamp'])
+else:
+    print("Fetching 1 year of 1-hour BTC/USDT data from Binance...")
+    df = BinanceDataClient.fetch_data(symbol="BTCUSDT", interval="1h", max_points=10000)
+    if len(df) > 8760:
+        df = df.iloc[-8760:].copy()
+        df.reset_index(drop=True, inplace=True)
+    os.makedirs('data', exist_ok=True)
+    df.to_csv(data_file, index=False)
+    print(f"Saved to {data_file}")
+
 prices = df['close'].values
 returns = df['close'].pct_change().fillna(0).values
 
-print(f"Fetched {len(df)} candles. Date range: {df['timestamp'].min()} to {df['timestamp'].max()}")
+print(f"Loaded {len(df)} candles. Date range: {df['timestamp'].min()} to {df['timestamp'].max()}")
 """
 
 code_run_filters = """# 2. Walk-Forward Feature Engineering & Training
@@ -125,8 +135,8 @@ print("ML Filtering complete.")
 code_backtest = """# 3. Backtest IS vs OOS
 print("Running Backtest Engine...")
 
-# Run ML Strategy (Maker / Limit Order simulation)
-bt_ml = Backtester(taker_fee_bps=0.0) 
+# Run backtest with 1.5 bps fee
+bt_ml = Backtester(taker_fee_bps=1.5) 
 results_ml = bt_ml.run(df, pd.Series(signals_ml))
 results_ml['period'] = np.where(np.arange(len(results_ml)) < split_idx, 'IS', 'OOS')
 

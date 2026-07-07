@@ -24,16 +24,26 @@ from src.execution.engine import ExecutionEngine
 """
 
 code_fetch = """# 1. Fetch Data
-print("Fetching 1 year of 1-hour BTC/USDT data from Binance...")
-df = BinanceDataClient.fetch_data(symbol="BTCUSDT", interval="1h", max_points=10000)
-# Slice to exactly 1 year of hours (8760) if we have more
-if len(df) > 8760:
-    df = df.iloc[-8760:].copy()
-    df.reset_index(drop=True, inplace=True)
+import os
+data_file = 'data/btc_1h_2025_2026.csv'
+if os.path.exists(data_file):
+    print("Loading data from frozen CSV...")
+    df = pd.read_csv(data_file, parse_dates=['timestamp'])
+else:
+    print("Fetching 1 year of 1-hour BTC/USDT data from Binance...")
+    df = BinanceDataClient.fetch_data(symbol="BTCUSDT", interval="1h", max_points=10000)
+    # Slice to exactly 1 year of hours (8760) if we have more
+    if len(df) > 8760:
+        df = df.iloc[-8760:].copy()
+        df.reset_index(drop=True, inplace=True)
+    os.makedirs('data', exist_ok=True)
+    df.to_csv(data_file, index=False)
+    print(f"Saved to {data_file}")
+
 prices = df['close'].values
 returns = df['close'].pct_change().fillna(0).values
 
-print(f"Fetched {len(df)} candles. Date range: {df['timestamp'].min()} to {df['timestamp'].max()}")
+print(f"Loaded {len(df)} candles. Date range: {df['timestamp'].min()} to {df['timestamp'].max()}")
 """
 
 code_run_filters = """# 2. Walk-Forward Validation & Signal Generation
@@ -117,7 +127,7 @@ results_naive = bt_naive.run(df, pd.Series(signals_naive))
 results_naive['period'] = np.where(np.arange(len(results_naive)) < split_idx, 'IS', 'OOS')
 
 # Run Thresholded (Maker / Limit Order simulation)
-bt_thresh = Backtester(taker_fee_bps=0.0) # 0% fee for passive maker orders
+bt_thresh = Backtester(taker_fee_bps=1.5) # Fee Drag: 1.5 bps maker fee (passive limit orders, capturing some spread but paying exchange execution)
 results_thresh = bt_thresh.run(df, pd.Series(signals_threshold))
 results_thresh['period'] = np.where(np.arange(len(results_thresh)) < split_idx, 'IS', 'OOS')
 
