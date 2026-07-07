@@ -130,11 +130,13 @@ class PairsKalmanFilter:
     Observation: y_t = alpha_t + beta_t * x_t + v_t
     State: s_t = [alpha_t, beta_t]^T
     """
-    def __init__(self, delta: float = 1e-4, R: float = 1e-3):
+    def __init__(self, delta: float = 1e-4, R: float = 1e-3, adaptive: bool = True, alpha: float = 0.01):
         """
         Args:
-            delta: Process noise variance (controls how fast beta/alpha adapt).
-            R: Observation noise variance (controls how much we trust the spread).
+            delta: Process noise variance (initialization).
+            R: Observation noise variance (initialization).
+            adaptive: If True, uses recursive online EM to update Vw and Ve.
+            alpha: Learning rate for adaptive updates.
         """
         self.x = np.array([0.0, 1.0])  # Initialize [alpha, beta]
         self.P = np.eye(2)             # State covariance
@@ -142,6 +144,9 @@ class PairsKalmanFilter:
         self.Vw = delta / (1 - delta) * np.eye(2) # Process noise (Q)
         self.Ve = R                               # Observation noise (R)
         self.I = np.eye(2)
+        
+        self.adaptive = adaptive
+        self.alpha = alpha
         
     def step(self, x_price: float, y_price: float) -> float:
         """
@@ -171,6 +176,25 @@ class PairsKalmanFilter:
         
         # Kalman Gain K
         K = self.P @ H.T @ np.linalg.inv(self.S)
+        
+        # Adaptive updates for Ve and Vw
+        if self.adaptive:
+            # Ve (R) update
+            e_sq = e**2
+            HPHT = (H @ self.P @ H.T)[0, 0]
+            Ve_est = max(1e-8, e_sq - HPHT)
+            self.Ve = (1 - self.alpha) * self.Ve + self.alpha * Ve_est
+            
+            # Vw (Q) update
+            correction = K * e
+            Vw_est = correction @ correction.T
+            self.Vw = (1 - self.alpha) * self.Vw + self.alpha * Vw_est
+            
+            # Keep Vw diagonal and strictly positive for stability
+            self.Vw[0, 1] = 0.0
+            self.Vw[1, 0] = 0.0
+            self.Vw[0, 0] = max(1e-8, self.Vw[0, 0])
+            self.Vw[1, 1] = max(1e-8, self.Vw[1, 1])
         
         # Update step
         self.x = self.x + (K * e).flatten()
