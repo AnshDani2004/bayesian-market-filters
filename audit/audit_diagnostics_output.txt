@@ -1,0 +1,37 @@
+Output of: python audit/audit_diagnostics.py (run 2026-10-12, same environment as rerun_2026-10-12.txt)
+
+data sha256: 75532235493ce4ba228ee54cb5348295fe59188eac5ffb5d44b92803df8122e3
+rows=8760 split_idx=4380 IS=2025-06-30 10:00:00+00:00..2026-01-05 08:00:00+00:00 OOS=2026-01-05 09:00:00+00:00..2026-07-07 09:00:00+00:00
+volume==0 rows: 4436
+
+[1] Reproduction of README rows (README fee assumptions: maker 1.5 bps)
+  AlphaThreshold  IS : Sharpe +0.00  MaxDD -10.32%  Hit 48.35%  NetPnL -1.22%
+  AlphaThreshold  OOS: Sharpe +0.71  MaxDD -12.84%  Hit 52.87%  NetPnL +5.67%
+  ML              IS : Sharpe +14.03  MaxDD -3.41%  Hit 76.87%  NetPnL +191.46%
+  ML              OOS: Sharpe +2.33  MaxDD -9.67%  Hit 55.81%  NetPnL +30.58%
+
+[2] Cost per unit of position change (bps). 0 = frictionless, 1.5 = README maker, 5 = README taker, 10 = taker plus an assumed 5 bps half-spread
+  AlphaThreshold  fee= 0.0  OOS Sharpe +1.71  MaxDD -8.14%  Hit 53.50%  NetPnL +15.38%
+  AlphaThreshold  fee= 1.5  OOS Sharpe +0.71  MaxDD -12.84%  Hit 52.87%  NetPnL +5.67%
+  AlphaThreshold  fee= 5.0  OOS Sharpe -1.61  MaxDD -22.98%  Hit 50.42%  NetPnL -13.94%
+  AlphaThreshold  fee=10.0  OOS Sharpe -4.88  MaxDD -37.26%  Hit 46.71%  NetPnL -35.81%
+  ML              fee= 0.0  OOS Sharpe +3.23  MaxDD -7.70%  Hit 56.91%  NetPnL +45.77%
+  ML              fee= 1.5  OOS Sharpe +2.33  MaxDD -9.67%  Hit 55.81%  NetPnL +30.58%
+  ML              fee= 5.0  OOS Sharpe +0.20  MaxDD -14.15%  Hit 54.17%  NetPnL +0.99%
+  ML              fee=10.0  OOS Sharpe -2.82  MaxDD -32.08%  Hit 50.07%  NetPnL -30.04%
+
+[3] One extra bar of execution delay (trade at the next hourly close), fee 1.5 bps
+  AlphaThreshold  OOS Sharpe -0.34  MaxDD -15.96%  Hit 51.59%  NetPnL -3.56%
+  ML              OOS Sharpe +0.22  MaxDD -14.50%  Hit 50.07%  NetPnL +1.24%
+
+[4] OOS exposure, turnover, long/short split (fee 1.5 bps)
+  AlphaThreshold  hours in market 942/4380 (long 439, short 503); position changes 1072; sum gross +15.08%, sum fees 8.79%; sum gross from longs +3.65%, from shorts +11.43%
+  ML              hours in market 731/4380 (long 487, short 244); position changes 703; sum gross +39.15%, sum fees 11.01%; sum gross from longs +20.46%, from shorts +18.69%
+
+[5] Buy and hold BTC over the same halves (no fees)
+  IS: total -14.09%  Sharpe -0.51
+  OOS: total -31.63%  Sharpe -1.38
+
+[6] OOS Sharpe uncertainty (fee 1.5 bps). iid SE ~ sqrt(PPY/N)*sqrt(1+SR_h^2/2); moving-block bootstrap, block 24 h, 2000 reps, seed 0
+  AlphaThreshold  N=4380 Sharpe +0.71  iid SE 1.41  t~0.50  block-bootstrap 95% CI [-2.38, +3.71]
+  ML              N=4380 Sharpe +2.33  iid SE 1.41  t~1.64  block-bootstrap 95% CI [-0.11, +4.78]

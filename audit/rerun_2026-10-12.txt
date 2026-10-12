@@ -1,0 +1,86 @@
+Audit rerun, 2026-10-12. Code: git bfdee406a1d11ddb8e3965418487fede86e103f6 (unmodified). Run from repo root with MPLBACKEND=Agg.
+Environment: Python 3.13.2, numpy 2.5.4, pandas 3.0.6, scikit-learn 1.9.1, scipy 1.18.1
+Data sha256: 75532235493ce4ba228ee54cb5348295fe59188eac5ffb5d44b92803df8122e3  data/btc_1h_2025_2026.csv
+Data sha256: cf63e76b72cd3e8542aedeacdafee43874424a425a2016789c8dbf690c10589f  data/btc_eth_1h_2025_2026.csv
+
+########## python notebook_03_backtest.py
+Loading data from frozen CSV...
+Loaded 8760 candles. Date range: 2025-06-30 10:00:00+00:00 to 2026-07-07 09:00:00+00:00
+Initializing Filters...
+Training HMM on In-Sample Data...
+Running Online Filter Stack...
+Filtering complete.
+Running Backtest Engine...
+
+=== Backtest Results: Naive Continuous Bleed (IS) [N=4380] ===
+Sharpe Ratio:  -1.76
+Max Drawdown:  -22.70%
+Hit Rate:      44.56%
+Total Net PnL: -19.71%
+
+=== Backtest Results: Naive Continuous Bleed (OOS) [N=4380] ===
+Sharpe Ratio:  -1.84
+Max Drawdown:  -24.33%
+Hit Rate:      46.43%
+Total Net PnL: -15.78%
+
+=== Backtest Results: Alpha Threshold (Maker) (IS) [N=4380] ===
+Sharpe Ratio:  0.00
+Max Drawdown:  -10.32%
+Hit Rate:      48.35%
+Total Net PnL: -1.22%
+
+=== Backtest Results: Alpha Threshold (Maker) (OOS) [N=4380] ===
+Sharpe Ratio:  0.71
+Max Drawdown:  -12.84%
+Hit Rate:      52.87%
+Total Net PnL: 5.67%
+
+########## python notebook_04_ml_overlay.py
+Loading data from frozen CSV...
+Loaded 8760 candles. Date range: 2025-06-30 10:00:00+00:00 to 2026-07-07 09:00:00+00:00
+Initializing Filters...
+Training HMM on In-Sample Data...
+Collecting features for ML...
+Training ML Signal Generator on IS data...
+Generating Online Signals...
+ML Filtering complete.
+Running Backtest Engine...
+
+=== Backtest Results: ML Overlay (Maker) (IS) [N=4380] ===
+Sharpe Ratio:  14.03
+Max Drawdown:  -3.41%
+Hit Rate:      76.87%
+Total Net PnL: 191.46%
+
+=== Backtest Results: ML Overlay (Maker) (OOS) [N=4380] ===
+Sharpe Ratio:  2.33
+Max Drawdown:  -9.67%
+Hit Rate:      55.81%
+Total Net PnL: 30.58%
+
+########## python notebook_05_multi_asset_statarb.py
+Loading data from frozen CSV...
+Loaded 8760 candles. Date range: 2025-06-30 10:00:00+00:00 to 2026-07-07 09:00:00+00:00
+Running Pairs Kalman Filter...
+Filtering complete.
+Running Backtest Engine...
+
+=== Backtest Results: Pairs Trading (Kelly Sizing) (IS) [N=4380] ===
+Sharpe Ratio:  -2.63
+Max Drawdown:  -0.02%
+Total Net PnL: -0.01%
+
+=== Backtest Results: Pairs Trading (Kelly Sizing) (OOS) [N=4380] ===
+Sharpe Ratio:  -5.02
+Max Drawdown:  -0.34%
+Total Net PnL: -0.34%
+
+########## PYTHONPATH=. python scripts/diagnose_statarb.py (ADF lines; statsmodels is not in requirements.txt)
+=== Augmented Dickey-Fuller Test on Kalman Spread ===
+In-Sample ADF Statistic: -8.1892
+In-Sample p-value: 0.0000
+Out-Of-Sample ADF Statistic: -12.6656
+Out-Of-Sample p-value: 0.0000
+
+########## pytest: tests/test_bt.py fails at collection (reads a file that does not exist, notebook_04_backtest.txt); the other 12 tests pass.
